@@ -13,16 +13,19 @@ class ProductListView(generics.ListAPIView):
 
 class UpdateStockView(APIView):
     """
-    Vista que maneja la solicitud POST para actualizar el stock de un producto específico.
+    Vista que maneja la solicitud PUT para actualizar el stock de un producto específico.
     """
-    def post(self, request, product_id):
+    def put(self, request, product_id):
         product = generics.get_object_or_404(Product, id=product_id)
         new_stock = request.data.get('stock')
         if new_stock is not None:
-            product.stock = int(new_stock)
-            product.save()
-            return Response({'message': 'Stock updated successfully', 'stock': product.stock})
-        return Response({'error': 'Invalid stock value'}, status=400)
+            try:
+                product.stock = int(new_stock)
+                product.save()
+                return Response({'message': 'Stock updated successfully', 'stock': product.stock})
+            except ValueError:
+                return Response({'error': 'Invalid stock value'}, status=400)
+        return Response({'error': 'Stock value is required'}, status=400)
     
 
 class CreateProductView(generics.CreateAPIView):

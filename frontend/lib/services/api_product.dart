@@ -36,7 +36,7 @@ class ApiServiceProduct {
 
   /// Método para actualizar el stock de un producto.
   Future<void> updateStock(int productId, int newStock) async {
-    final response = await http.post(
+    final response = await http.put(
       Uri.parse('${baseUrl}products/$productId/update-stock/'),
       headers: {"Content-Type": "application/json"},
       body: json.encode({"stock": newStock}),
