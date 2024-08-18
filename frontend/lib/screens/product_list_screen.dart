@@ -1,5 +1,3 @@
-// lib/screens/product_list_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:inventory_manager/models/product.dart';
 import 'package:inventory_manager/screens/product_add_screen.dart';
@@ -61,7 +59,8 @@ class ProductListScreenState extends State<ProductListScreen> {
                 Product product = snapshot.data![index];
                 return ListTile(
                   title: Text(product.name),
-                  subtitle: Text('Stock: ${product.stock} | Precio: \$${product.price}'),
+                  subtitle: Text(
+                      'Stock: ${product.stock} | Precio: \$${product.price} | Estado: ${product.state ? "Checkeado" : "No checkeado"}'),
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(

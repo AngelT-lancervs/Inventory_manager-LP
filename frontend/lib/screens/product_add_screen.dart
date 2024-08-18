@@ -15,6 +15,7 @@ class AddProductScreenState extends State<AddProductScreen> {
   final _descriptionController = TextEditingController();
   final _stockController = TextEditingController();
   final _priceController = TextEditingController();
+  bool _stateChecked = false;  // Nuevo campo para el estado del producto
 
   final ApiServiceProduct apiService = ApiServiceProduct();
 
@@ -26,6 +27,7 @@ class AddProductScreenState extends State<AddProductScreen> {
         description: _descriptionController.text,
         stock: int.parse(_stockController.text),
         price: double.parse(_priceController.text),
+        state: _stateChecked  // Incluir el estado del producto
       );
 
       try {
@@ -85,6 +87,16 @@ class AddProductScreenState extends State<AddProductScreen> {
                     return 'Por favor ingrese un valor numérico';
                   }
                   return null;
+                },
+              ),
+              const SizedBox(height: 10),
+              CheckboxListTile(
+                title: const Text('Checkeado'),
+                value: _stateChecked,
+                onChanged: (bool? value) {
+                  setState(() {
+                    _stateChecked = value ?? false;
+                  });
                 },
               ),
               const SizedBox(height: 20),
