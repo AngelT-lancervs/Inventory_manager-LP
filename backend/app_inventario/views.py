@@ -19,16 +19,24 @@ class ProductListView(generics.ListAPIView):
 
 class UpdateStockView(APIView):
     """
-    Vista que maneja la solicitud PUT para actualizar el stock de un producto específico.
+    Vista que maneja la solicitud PUT para actualizar el stock de un producto específico y su estado "checked".
     """
     def put(self, request, product_id):
         product = generics.get_object_or_404(Product, id=product_id)
         new_stock = request.data.get('stock')
+        new_checked = request.data.get('checked', None)  # Obtener el estado "checked" desde la solicitud
+
         if new_stock is not None:
             try:
                 product.stock = int(new_stock)
+                if new_checked is not None:
+                    product.checked = bool(new_checked)  # Actualizar el estado "checked" del producto
                 product.save()
-                return Response({'message': 'Stock updated successfully', 'stock': product.stock})
+                return Response({
+                    'message': 'Stock and checked status updated successfully',
+                    'stock': product.stock,
+                    'checked': product.checked
+                })
             except ValueError:
                 return Response({'error': 'Invalid stock value'}, status=400)
         return Response({'error': 'Stock value is required'}, status=400)

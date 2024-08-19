@@ -34,10 +34,17 @@ class ApiServiceProduct {
     }
   }
 
-  /// Método para actualizar el stock de un producto.
+/// Método para actualizar el stock de un producto.
   Future<void> updateStock(int productId, int newStock) async {
     final response = await http.put(
       Uri.parse('${baseUrl}products/$productId/update-stock/'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'stock': newStock,
+        'checked': true,  // Asegúrate de enviar el campo "checked" como true
+      }),
     );
 
     if (response.statusCode != 200) {
@@ -45,12 +52,14 @@ class ApiServiceProduct {
     }
   }
 
+  /// Método para obtener productos filtrados por su estado "checked".
   Future<List<Product>> getFilteredProducts(bool checked) async {
-    String booleanString = 'False';
-    if (checked) {
-      booleanString = 'True';
-    }
-    final response = await http.get(Uri.parse('${baseUrl}products/?checked=$booleanString'));
+    String booleanString = checked ? 'True' : 'False';
+
+    final response = await http.get(
+      Uri.parse('${baseUrl}products/?checked=$booleanString'),
+    );
+
     if (response.statusCode == 200) {
       List<dynamic> body = json.decode(response.body);
       List<Product> products = body.map((dynamic item) => Product.fromJson(item)).toList();

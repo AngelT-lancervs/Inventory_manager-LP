@@ -22,7 +22,7 @@ class ProductListScreenState extends State<ProductListScreen> {
     futureProducts = apiService.getProducts();
   }
 
-  void _filterProducts(bool checked){
+  void _filterProducts(bool checked) {
     setState(() {
       futureProducts = apiService.getFilteredProducts(checked);
     });
@@ -77,13 +77,14 @@ class ProductListScreenState extends State<ProductListScreen> {
                       _selectedFilter = newValue;
                       switch (_selectedFilter) {
                         case 'Todos':
-                          setState(() {
-                            futureProducts = apiService.getProducts();
-                          });
+                          futureProducts = apiService.getProducts();
+                          break;
                         case 'checkeados':
                           _filterProducts(true);
+                          break;
                         case 'no-checkeados':
                           _filterProducts(false);
+                          break;
                       }
                     });
                   },
@@ -109,7 +110,8 @@ class ProductListScreenState extends State<ProductListScreen> {
                       return ListTile(
                         title: Text(product.name),
                         subtitle: Text(
-                            'Stock: ${product.stock} | Precio: \$${product.price} | Estado: ${product.state ? "Checkeado" : "No checkeado"}'),
+                          'Stock: ${product.stock} | Precio: \$${product.price} | Estado: ${product.checked ? 'Checkeado' : 'No checkeado'}',
+                        ),
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
@@ -117,7 +119,14 @@ class ProductListScreenState extends State<ProductListScreen> {
                             ),
                           ).then((_) {
                             setState(() {
-                              futureProducts = apiService.getProducts();
+                              // Recarga los productos después de la actualización
+                              if (_selectedFilter == 'Todos') {
+                                futureProducts = apiService.getProducts();
+                              } else if (_selectedFilter == 'checkeados') {
+                                _filterProducts(true);
+                              } else if (_selectedFilter == 'no-checkeados') {
+                                _filterProducts(false);
+                              }
                             });
                           });
                         },

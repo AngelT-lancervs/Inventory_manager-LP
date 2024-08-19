@@ -27,7 +27,7 @@ class AddProductScreenState extends State<AddProductScreen> {
         description: _descriptionController.text,
         stock: int.parse(_stockController.text),
         price: double.parse(_priceController.text),
-        state: _stateChecked  // Incluir el estado del producto
+        checked: _stateChecked  // Incluir el estado del producto
       );
 
       try {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:inventory_manager/models/product.dart';
+import 'package:inventory_manager/screens/product_list_screen.dart';
 import 'package:inventory_manager/services/api_product.dart';
 
 class UpdateStockScreen extends StatefulWidget {
@@ -20,7 +21,12 @@ class UpdateStockScreenState extends State<UpdateStockScreen> {
     try {
       int newStock = int.parse(_stockController.text);
       await apiService.updateStock(widget.product.id, newStock);
-      Navigator.of(context).pop();
+
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => const ProductListScreen(),
+        ),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al actualizar el stock: $e')),

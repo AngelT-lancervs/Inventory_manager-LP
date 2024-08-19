@@ -4,7 +4,7 @@ class Product {
   final String description;
   final int stock;
   final double price;
-  final bool state;
+  final bool checked;
 
   Product({
     required this.id,
@@ -12,7 +12,7 @@ class Product {
     required this.description,
     required this.stock,
     required this.price,
-    required this.state,
+    required this.checked,
   });
 
   /// Método para crear una instancia de Product a partir de JSON.
@@ -23,7 +23,7 @@ class Product {
       description: json['description'] ?? '',
       stock: json['stock'],
       price: json['price'].toDouble(),
-      state: json['state'] ?? false,  // Asigna false si state es null
+      checked: json['checked'] ?? false,  // Asigna false si checked es null
     );
   }
 
@@ -35,7 +35,7 @@ class Product {
       'description': description,
       'stock': stock,
       'price': price,
-      'state': state,
+      'checked': checked,
     };
   }
 }
