@@ -1,8 +1,8 @@
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Product
-from .serializers import ProductSerializer
+from .models import Product, Draft
+from .serializers import ProductSerializer, DraftSerializer
 
 class ProductListView(generics.ListAPIView):
     """
@@ -48,4 +48,27 @@ class CreateProductView(generics.CreateAPIView):
     """
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+
+
+class DraftView(generics.ListCreateAPIView):
+    """
+    Vista que maneja las solicitudes GET para listar todos los drafts
+    y POST para crear un nuevo draft.
+    """
+    queryset = Draft.objects.all()
+    serializer_class = DraftSerializer
+
+    def get(self, request, *args, **kwargs):
+        """
+        Maneja la solicitud GET para obtener todos los drafts.
+        """
+        drafts = self.get_queryset()
+        serializer = self.get_serializer(drafts, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        """
+        Maneja la solicitud POST para crear un nuevo draft.
+        """
+        return super().post(request, *args, **kwargs)
 

@@ -5,14 +5,16 @@ import 'package:http/http.dart' as http;
 import '../models/product.dart';
 
 class ApiServiceProduct {
-  final String baseUrl = "http://192.168.1.4:8000/api/"; 
+  final String baseUrl = "http://127.0.0.1:8000/api/";
+
   /// Método para obtener la lista de productos.
   Future<List<Product>> getProducts() async {
     final response = await http.get(Uri.parse('${baseUrl}products/'));
 
     if (response.statusCode == 200) {
       List<dynamic> body = json.decode(response.body);
-      List<Product> products = body.map((dynamic item) => Product.fromJson(item)).toList();
+      List<Product> products =
+          body.map((dynamic item) => Product.fromJson(item)).toList();
       return products;
     } else {
       throw Exception("Error al cargar los productos");
@@ -34,7 +36,7 @@ class ApiServiceProduct {
     }
   }
 
-/// Método para actualizar el stock de un producto.
+  /// Método para actualizar el stock de un producto.
   Future<void> updateStock(int productId, int newStock) async {
     final response = await http.put(
       Uri.parse('${baseUrl}products/$productId/update-stock/'),
@@ -43,7 +45,7 @@ class ApiServiceProduct {
       },
       body: jsonEncode({
         'stock': newStock,
-        'checked': true,  // Asegúrate de enviar el campo "checked" como true
+        'checked': true, // Asegúrate de enviar el campo "checked" como true
       }),
     );
 
@@ -62,7 +64,8 @@ class ApiServiceProduct {
 
     if (response.statusCode == 200) {
       List<dynamic> body = json.decode(response.body);
-      List<Product> products = body.map((dynamic item) => Product.fromJson(item)).toList();
+      List<Product> products =
+          body.map((dynamic item) => Product.fromJson(item)).toList();
       return products;
     } else {
       throw Exception("Error al cargar los productos");

@@ -1,6 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:inventory_manager/models/product.dart';
 import 'package:inventory_manager/screens/product_add_screen.dart';
+import 'package:inventory_manager/screens/product_list_draft_screen.dart';
+import 'package:inventory_manager/screens/draft_list_screen.dart';
 import 'package:inventory_manager/screens/product_update_screen.dart';
 import 'package:inventory_manager/services/api_product.dart';
 
@@ -15,6 +19,7 @@ class ProductListScreenState extends State<ProductListScreen> {
   final ApiServiceProduct apiService = ApiServiceProduct();
   late Future<List<Product>> futureProducts;
   String? _selectedFilter;
+  List<Product> displayedProducts = [];
 
   @override
   void initState() {
@@ -28,6 +33,67 @@ class ProductListScreenState extends State<ProductListScreen> {
     });
   }
 
+  Future<void> _saveDraft(String name) async {
+    final draft = {
+      'name': name,
+      'productsDraft':
+          displayedProducts.map((product) => product.toJson()).toList(),
+    };
+
+    final url = Uri.parse(
+        'http://127.0.0.1:8000/drafts/'); // Reemplaza con la URL de tu servidor
+    final headers = {'Content-Type': 'application/json'};
+    final body = json.encode(draft);
+
+    final response = await http.post(url, headers: headers, body: body);
+
+    if (response.statusCode == 201) {
+      print('Draft creado exitosamente');
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => const ProductListDraftScreen(),
+        ),
+      );
+    } else {
+      print('Error al crear draft: ${response.body}');
+    }
+  }
+
+  Future<void> _showNameDialog() async {
+    final TextEditingController _nameController = TextEditingController();
+
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Nombre del Borrador'),
+          content: TextField(
+            controller: _nameController,
+            decoration: const InputDecoration(
+                hintText: "Ingrese el nombre del borrador"),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Guardar'),
+              onPressed: () {
+                if (_nameController.text.isNotEmpty) {
+                  _saveDraft(_nameController.text);
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,11 +103,13 @@ class ProductListScreenState extends State<ProductListScreen> {
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
-              Navigator.of(context).push(
+              Navigator.of(context)
+                  .push(
                 MaterialPageRoute(
                   builder: (context) => const AddProductScreen(),
                 ),
-              ).then((_) {
+              )
+                  .then((_) {
                 setState(() {
                   futureProducts = apiService.getProducts();
                 });
@@ -101,8 +169,11 @@ class ProductListScreenState extends State<ProductListScreen> {
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No se encontraron productos'));
+                  return const Center(
+                      child: Text('No se encontraron productos'));
                 } else {
+                  // Aquí almacenamos los productos mostrados
+                  displayedProducts = snapshot.data!;
                   return ListView.builder(
                     itemCount: snapshot.data!.length,
                     itemBuilder: (context, index) {
@@ -113,11 +184,14 @@ class ProductListScreenState extends State<ProductListScreen> {
                           'Stock: ${product.stock} | Precio: \$${product.price} | Estado: ${product.checked ? 'Checkeado' : 'No checkeado'}',
                         ),
                         onTap: () {
-                          Navigator.of(context).push(
+                          Navigator.of(context)
+                              .push(
                             MaterialPageRoute(
-                              builder: (context) => UpdateStockScreen(product: product),
+                              builder: (context) =>
+                                  UpdateStockScreen(product: product),
                             ),
-                          ).then((_) {
+                          )
+                              .then((_) {
                             setState(() {
                               // Recarga los productos después de la actualización
                               if (_selectedFilter == 'Todos') {
@@ -138,6 +212,31 @@ class ProductListScreenState extends State<ProductListScreen> {
             ),
           ),
         ],
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ElevatedButton(
+              onPressed: () async {
+                _showNameDialog(); // Muestra el cuadro de diálogo para ingresar el nombre
+              },
+              child: const Text('Guardar borrador'),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const DraftListScreen(),
+                  ),
+                );
+              },
+              child: const Text('Ver Borradores Guardados'),
+            ),
+          ],
+        ),
       ),
     );
   }
