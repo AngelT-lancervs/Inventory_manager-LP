@@ -8,7 +8,13 @@ class ProductListView(generics.ListAPIView):
     """
     Vista que maneja la solicitud GET para listar todos los productos.
     """
-    queryset = Product.objects.all()
+    def get_queryset(self):
+        queryset = Product.objects.all()
+        checkedParam = self.request.query_params.get('checked', None)
+        if checkedParam:
+            queryset = queryset.filter(checked = checkedParam)
+        return queryset
+    
     serializer_class = ProductSerializer
 
 class UpdateStockView(APIView):
@@ -34,3 +40,4 @@ class CreateProductView(generics.CreateAPIView):
     """
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+
