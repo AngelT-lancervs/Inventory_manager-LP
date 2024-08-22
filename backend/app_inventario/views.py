@@ -71,4 +71,3 @@ class DraftView(generics.ListCreateAPIView):
         Maneja la solicitud POST para crear un nuevo draft.
         """
         return super().post(request, *args, **kwargs)
-

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:inventory_manager/core/constants.dart';
 import 'package:inventory_manager/models/product.dart';
 import 'package:inventory_manager/screens/product_add_screen.dart';
 import 'package:inventory_manager/screens/product_list_draft_screen.dart';
@@ -41,7 +42,7 @@ class ProductListScreenState extends State<ProductListScreen> {
     };
 
     final url = Uri.parse(
-        'http://127.0.0.1:8000/drafts/'); // Reemplaza con la URL de tu servidor
+        '${url_global}drafts/'); // Reemplaza con la URL de tu servidor
     final headers = {'Content-Type': 'application/json'};
     final body = json.encode(draft);
 

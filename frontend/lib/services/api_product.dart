@@ -3,9 +3,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/product.dart';
+import '../core/constants.dart';
 
 class ApiServiceProduct {
-  final String baseUrl = "http://127.0.0.1:8000/api/";
+  final String baseUrl = "${url_global}api/";
 
   /// Método para obtener la lista de productos.
   Future<List<Product>> getProducts() async {

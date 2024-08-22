@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:inventory_manager/core/constants.dart';
 
 class DraftListScreen extends StatefulWidget {
   const DraftListScreen({Key? key}) : super(key: key);
@@ -20,7 +21,7 @@ class _DraftListScreenState extends State<DraftListScreen> {
 
   Future<List<Map<String, dynamic>>> fetchDrafts() async {
     final url = Uri.parse(
-        'http://127.0.0.1:8000/drafts/'); // Asegúrate de usar la URL correcta
+        '${url_global}drafts/'); // Asegúrate de usar la URL correcta
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
