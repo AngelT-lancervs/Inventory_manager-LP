@@ -7,4 +7,5 @@ urlpatterns = [
     path('api/products/create/', CreateProductView.as_view(), name='create_product'),
     path('drafts/', DraftView.as_view(), name='drafts'),
     path('download-excel/', ProductExcelReportView.as_view(), name='download-excel'),
+    path('drafts/<int:pk>/', DraftView.as_view(), name='draft-delete'),
 ]

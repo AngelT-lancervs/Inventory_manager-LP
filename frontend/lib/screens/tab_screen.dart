@@ -43,7 +43,7 @@ class _InventoryScreenState extends State<InventoryScreen> with SingleTickerProv
         controller: _tabController, // Asocia el controlador de pestañas con el contenido
         children: const [
           ProductListScreen(), // Contenido de la primera pestaña: Lista de productos
-          InventoryDetailsScreen(), // Contenido de la segunda pestaña: Lista de borradores
+          InventoryDetailsScreen(), // Contenido de la segunda pestaña: Detalles del inventario
         ],
       ),
     );

@@ -52,6 +52,7 @@ class _InventoryDetailsScreenState extends State<InventoryDetailsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detalles del Inventario'),
+        automaticallyImplyLeading: false,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

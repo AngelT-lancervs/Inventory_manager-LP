@@ -1,7 +1,9 @@
 from ctypes import alignment
 from datetime import datetime
 from msilib.schema import Font
+from telnetlib import STATUS
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 import openpyxl
 from openpyxl.styles import Font, Alignment
 from rest_framework import generics
@@ -58,8 +60,8 @@ class CreateProductView(generics.CreateAPIView):
 
 class DraftView(generics.ListCreateAPIView):
     """
-    Vista que maneja las solicitudes GET para listar todos los drafts
-    y POST para crear un nuevo draft.
+    Vista que maneja las solicitudes GET para listar todos los drafts,
+    POST para crear un nuevo draft, y DELETE para eliminar un draft.
     """
     queryset = Draft.objects.all()
     serializer_class = DraftSerializer
@@ -77,6 +79,15 @@ class DraftView(generics.ListCreateAPIView):
         Maneja la solicitud POST para crear un nuevo draft.
         """
         return super().post(request, *args, **kwargs)
+    
+    def delete(self, request, *args, **kwargs):
+        """
+        Maneja la solicitud DELETE para eliminar un draft específico por ID.
+        """
+        draft_id = kwargs.get('pk')
+        draft = get_object_or_404(Draft, id=draft_id)
+        draft.delete()
+        return Response({"message": "Borrador eliminado correctamente."}, status=204 )
 
 class ProductExcelReportView(APIView):
     """
