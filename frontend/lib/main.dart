@@ -1,7 +1,7 @@
 // lib/main.dart
 
 import 'package:flutter/material.dart';
-import 'screens/product_list_screen.dart';
+import 'package:inventory_manager/screens/tab_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue, // Color principal de la aplicación
       ),
-      home: const ProductListScreen(), // Define la pantalla inicial de la aplicación
+      home: const InventoryScreen(), // Define la pantalla inicial de la aplicación
     );
   }
 }
