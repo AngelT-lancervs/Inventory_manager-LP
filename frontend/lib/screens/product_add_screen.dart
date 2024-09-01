@@ -10,16 +10,24 @@ class AddProductScreen extends StatefulWidget {
 }
 
 class AddProductScreenState extends State<AddProductScreen> {
+  // Clave global para el formulario
   final _formKey = GlobalKey<FormState>();
+  
+  // Controladores de texto para los campos del formulario
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _stockController = TextEditingController();
   final _priceController = TextEditingController();
-  bool _stateChecked = false;  // Nuevo campo para el estado del producto
+  
+  // Estado del producto (Checkeado/No Checkeado)
+  bool _stateChecked = false; 
 
+  // Servicio API para manejar productos
   final ApiServiceProduct apiService = ApiServiceProduct();
 
+  // Función para crear un nuevo producto
   void _createProduct() async {
+    // Valida el formulario antes de proceder
     if (_formKey.currentState!.validate()) {
       Product newProduct = Product(
         id: 0,
@@ -27,13 +35,14 @@ class AddProductScreenState extends State<AddProductScreen> {
         description: _descriptionController.text,
         stock: int.parse(_stockController.text),
         price: double.parse(_priceController.text),
-        checked: _stateChecked  // Incluir el estado del producto
+        checked: _stateChecked, // Incluye el estado del producto
       );
 
       try {
         await apiService.createProduct(newProduct);
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(); // Regresa a la pantalla anterior al finalizar
       } catch (e) {
+        // Muestra un mensaje de error si la creación falla
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al crear el producto: $e')),
         );
@@ -45,17 +54,23 @@ class AddProductScreenState extends State<AddProductScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Agregar Producto'),
+        iconTheme: const IconThemeData(color: Colors.white), // Color del icono del AppBar
+        title: const Text('Agregar Producto', style: TextStyle(color: Colors.white),),
+        backgroundColor: Colors.deepPurple, // Color personalizado del AppBar
       ),
-      body: Padding(
+      body: SingleChildScrollView( // Permite desplazarse si el teclado cubre los campos
         padding: const EdgeInsets.all(16.0),
         child: Form(
-          key: _formKey,
+          key: _formKey, // Asocia la clave global al formulario
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Nombre'),
+                decoration: const InputDecoration(
+                  labelText: 'Nombre', 
+                  border: OutlineInputBorder(), // Añade borde al campo de texto
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor ingrese un nombre';
@@ -63,13 +78,21 @@ class AddProductScreenState extends State<AddProductScreen> {
                   return null;
                 },
               ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Descripción'),
+                decoration: const InputDecoration(
+                  labelText: 'Descripción', 
+                  border: OutlineInputBorder(), // Añade borde al campo de texto
+                ),
               ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _stockController,
-                decoration: const InputDecoration(labelText: 'Stock'),
+                decoration: const InputDecoration(
+                  labelText: 'Stock',
+                  border: OutlineInputBorder(), // Añade borde al campo de texto
+                ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty || int.tryParse(value) == null) {
@@ -78,9 +101,13 @@ class AddProductScreenState extends State<AddProductScreen> {
                   return null;
                 },
               ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _priceController,
-                decoration: const InputDecoration(labelText: 'Precio'),
+                decoration: const InputDecoration(
+                  labelText: 'Precio',
+                  border: OutlineInputBorder(), // Añade borde al campo de texto
+                ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty || double.tryParse(value) == null) {
@@ -89,7 +116,7 @@ class AddProductScreenState extends State<AddProductScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 16),
               CheckboxListTile(
                 title: const Text('Checkeado'),
                 value: _stateChecked,
@@ -98,11 +125,21 @@ class AddProductScreenState extends State<AddProductScreen> {
                     _stateChecked = value ?? false;
                   });
                 },
+                controlAffinity: ListTileControlAffinity.leading, // Posiciona la caja de verificación a la izquierda
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _createProduct,
-                child: const Text('Crear Producto'),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _createProduct,
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white, backgroundColor: Colors.deepPurple, // Color del texto del botón
+                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10), // Borde redondeado del botón
+                    ),
+                  ),
+                  child: const Text('Crear Producto', style: TextStyle(fontSize: 16)),
+                ),
               ),
             ],
           ),

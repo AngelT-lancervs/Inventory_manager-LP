@@ -25,15 +25,18 @@ class ProductListScreenState extends State<ProductListScreen> {
   @override
   void initState() {
     super.initState();
+    // Cargar productos desde la API al iniciar la pantalla
     futureProducts = apiService.getProducts();
   }
 
+  // Función para filtrar productos según su estado (checkeado o no)
   void _filterProducts(bool checked) {
     setState(() {
       futureProducts = apiService.getFilteredProducts(checked);
     });
   }
 
+  // Función para guardar un borrador de productos
   Future<void> _saveDraft(String name) async {
     final draft = {
       'name': name,
@@ -41,8 +44,7 @@ class ProductListScreenState extends State<ProductListScreen> {
           displayedProducts.map((product) => product.toJson()).toList(),
     };
 
-    final url = Uri.parse(
-        '${url_global}drafts/'); // Reemplaza con la URL de tu servidor
+    final url = Uri.parse('${url_global}drafts/'); // URL de la API para guardar borradores
     final headers = {'Content-Type': 'application/json'};
     final body = json.encode(draft);
 
@@ -60,8 +62,9 @@ class ProductListScreenState extends State<ProductListScreen> {
     }
   }
 
+  // Función para mostrar un diálogo donde se ingresa el nombre del borrador
   Future<void> _showNameDialog() async {
-    final TextEditingController _nameController = TextEditingController();
+    final TextEditingController nameController = TextEditingController();
 
     return showDialog<void>(
       context: context,
@@ -69,9 +72,11 @@ class ProductListScreenState extends State<ProductListScreen> {
         return AlertDialog(
           title: const Text('Nombre del Borrador'),
           content: TextField(
-            controller: _nameController,
+            controller: nameController,
             decoration: const InputDecoration(
-                hintText: "Ingrese el nombre del borrador"),
+              hintText: "Ingrese el nombre del borrador",
+              border: OutlineInputBorder(),
+            ),
           ),
           actions: <Widget>[
             TextButton(
@@ -83,8 +88,8 @@ class ProductListScreenState extends State<ProductListScreen> {
             TextButton(
               child: const Text('Guardar'),
               onPressed: () {
-                if (_nameController.text.isNotEmpty) {
-                  _saveDraft(_nameController.text);
+                if (nameController.text.isNotEmpty) {
+                  _saveDraft(nameController.text);
                   Navigator.of(context).pop();
                 }
               },
@@ -99,9 +104,10 @@ class ProductListScreenState extends State<ProductListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: false, // Oculta el botón de regresar
         title: const Text('Lista de Productos'),
         actions: [
+          // Botón para agregar un nuevo producto
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
@@ -112,6 +118,7 @@ class ProductListScreenState extends State<ProductListScreen> {
                 ),
               )
                   .then((_) {
+                // Recargar los productos después de agregar uno nuevo
                 setState(() {
                   futureProducts = apiService.getProducts();
                 });
@@ -132,6 +139,7 @@ class ProductListScreenState extends State<ProductListScreen> {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(width: 10),
+                // Dropdown para seleccionar el filtro de productos
                 DropdownButton<String>(
                   value: _selectedFilter,
                   hint: const Text('Seleccione un filtro'),
@@ -163,6 +171,7 @@ class ProductListScreenState extends State<ProductListScreen> {
             ),
           ),
           Expanded(
+            // Construir la lista de productos basados en el futuro cargado
             child: FutureBuilder<List<Product>>(
               future: futureProducts,
               builder: (context, snapshot) {
@@ -174,38 +183,49 @@ class ProductListScreenState extends State<ProductListScreen> {
                   return const Center(
                       child: Text('No se encontraron productos'));
                 } else {
-                  // Aquí almacenamos los productos mostrados
+                  // Almacena los productos mostrados actualmente
                   displayedProducts = snapshot.data!;
                   return ListView.builder(
                     itemCount: snapshot.data!.length,
                     itemBuilder: (context, index) {
                       Product product = snapshot.data![index];
-                      return ListTile(
-                        title: Text(product.name),
-                        subtitle: Text(
-                          'Stock: ${product.stock} | Precio: \$${product.price} | Estado: ${product.checked ? 'Checkeado' : 'No checkeado'}',
-                        ),
-                        onTap: () {
-                          Navigator.of(context)
-                              .push(
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  UpdateStockScreen(product: product),
+                      return Card(
+                        elevation: 2,
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 8, horizontal: 16),
+                        child: ListTile(
+                          title: Text(
+                            product.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
                             ),
-                          )
-                              .then((_) {
-                            setState(() {
-                              // Recarga los productos después de la actualización
-                              if (_selectedFilter == 'Todos') {
-                                futureProducts = apiService.getProducts();
-                              } else if (_selectedFilter == 'checkeados') {
-                                _filterProducts(true);
-                              } else if (_selectedFilter == 'no-checkeados') {
-                                _filterProducts(false);
-                              }
+                          ),
+                          subtitle: Text(
+                            'Stock: ${product.stock} | Precio: \$${product.price} | Estado: ${product.checked ? 'Checkeado' : 'No checkeado'}',
+                          ),
+                          onTap: () {
+                            // Navegar a la pantalla de actualización de stock
+                            Navigator.of(context)
+                                .push(
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    UpdateStockScreen(product: product),
+                              ),
+                            )
+                                .then((_) {
+                              // Recargar productos después de la actualización
+                              setState(() {
+                                if (_selectedFilter == 'Todos') {
+                                  futureProducts = apiService.getProducts();
+                                } else if (_selectedFilter == 'checkeados') {
+                                  _filterProducts(true);
+                                } else if (_selectedFilter == 'no-checkeados') {
+                                  _filterProducts(false);
+                                }
+                              });
                             });
-                          });
-                        },
+                          },
+                        ),
                       );
                     },
                   );
@@ -220,13 +240,23 @@ class ProductListScreenState extends State<ProductListScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Botón para guardar un borrador de la lista de productos
             ElevatedButton(
               onPressed: () async {
-                _showNameDialog(); // Muestra el cuadro de diálogo para ingresar el nombre
+                _showNameDialog(); // Muestra el cuadro de diálogo para ingresar el nombre del borrador
               },
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white, backgroundColor: Colors.deepPurple,
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0, vertical: 12.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               child: const Text('Guardar borrador'),
             ),
             const SizedBox(height: 10),
+            // Botón para ver los borradores guardados
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).push(
@@ -235,6 +265,14 @@ class ProductListScreenState extends State<ProductListScreen> {
                   ),
                 );
               },
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white, backgroundColor: Colors.grey,
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0, vertical: 12.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               child: const Text('Ver Borradores Guardados'),
             ),
           ],
