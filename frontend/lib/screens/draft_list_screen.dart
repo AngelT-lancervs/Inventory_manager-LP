@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:inventory_manager/core/constants.dart';
+import 'package:inventory_manager/screens/draft_product_edit_screen.dart';
 
 class DraftListScreen extends StatefulWidget {
-  const DraftListScreen({Key? key}) : super(key: key);
+  const DraftListScreen({super.key});
 
   @override
   _DraftListScreenState createState() => _DraftListScreenState();
@@ -193,6 +194,15 @@ class _DraftListScreenState extends State<DraftListScreen> {
                       ),
                     ],
                   ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            DraftProductEditScreen(draft: draft),
+                      ),
+                    );
+                  },
                 );
               },
             );
