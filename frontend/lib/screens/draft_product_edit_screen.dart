@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:inventory_manager/core/constants.dart';
 import 'package:inventory_manager/models/product.dart';
-import 'package:inventory_manager/services/api_product.dart';
-import 'package:inventory_manager/screens/product_add_screen.dart';
-import 'package:inventory_manager/screens/product_update_screen.dart';
 
 class DraftProductEditScreen extends StatefulWidget {
   final Map<String, dynamic> draft;
@@ -20,7 +17,6 @@ class _DraftProductEditScreenState extends State<DraftProductEditScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late List<Product> _selectedProducts;
-  final ApiServiceProduct apiService = ApiServiceProduct();
 
   @override
   void initState() {
@@ -34,45 +30,77 @@ class _DraftProductEditScreenState extends State<DraftProductEditScreen> {
   // Función para actualizar el borrador
   Future<void> _updateDraft() async {
     if (_formKey.currentState!.validate()) {
-      final updatedDraft = {
-        'name': _nameController.text,
-        'productsDraft':
-            _selectedProducts.map((product) => product.toJson()).toList(),
-      };
+      // Realizar un GET para verificar el ID del borrador
+      final urlGet = Uri.parse('${url_global}drafts/${widget.draft['id']}/');
+      final responseGet = await http.get(urlGet);
 
-      final url = Uri.parse(
-          '${url_global}drafts/${widget.draft['id']}/'); // URL para actualizar el borrador
-      final headers = {'Content-Type': 'application/json'};
-      final body = json.encode(updatedDraft);
+      if (responseGet.statusCode == 200) {
+        final currentDraft = json.decode(responseGet.body);
 
-      final response = await http.put(url, headers: headers, body: body);
+        // Modificar la información del borrador
+        final updatedDraft = {
+          'name': _nameController.text,
+          'productsDraft':
+              _selectedProducts.map((product) => product.toJson()).toList(),
+        };
 
-      if (response.statusCode == 200) {
-        print('Draft actualizado exitosamente');
-        Navigator.of(context)
-            .pop(); // Regresa a la pantalla anterior después de actualizar el borrador
+        // Realizar un POST con el borrador modificado
+        final urlPost = Uri.parse('${url_global}drafts/');
+        final headers = {'Content-Type': 'application/json'};
+        final body = json.encode(updatedDraft);
+
+        final responsePost =
+            await http.post(urlPost, headers: headers, body: body);
+
+        if (responsePost.statusCode == 200 || responsePost.statusCode == 201) {
+          print('Draft actualizado exitosamente');
+          Navigator.of(context)
+              .pop(); // Regresa a la pantalla anterior después de actualizar el borrador
+        } else {
+          print('Error al actualizar draft: ${responsePost.body}');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content:
+                  Text('Error al actualizar el borrador: ${responsePost.body}'),
+            ),
+          );
+        }
       } else {
-        print('Error al actualizar draft: ${response.body}');
+        print('Error al verificar draft: ${responseGet.body}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content:
-                  Text('Error al actualizar el borrador: ${response.body}')),
+            content:
+                Text('Error al verificar el borrador: ${responseGet.body}'),
+          ),
         );
       }
     }
   }
 
-  // Función para agregar un nuevo producto a la lista de seleccionados
-  void _addProduct(Product product) {
+  // Función para modificar el producto dentro del borrador
+  void _modifyProduct(Product product, int index, String action) {
     setState(() {
-      _selectedProducts.add(product);
-    });
-  }
+      int newStock = product.stock;
 
-  // Función para eliminar un producto de la lista de seleccionados
-  void _removeProduct(Product product) {
-    setState(() {
-      _selectedProducts.remove(product);
+      if (action == 'increase') {
+        newStock++;
+      } else if (action == 'decrease' && newStock > 0) {
+        newStock--;
+      } else if (action == 'remove') {
+        _selectedProducts.removeAt(index);
+        return;
+      }
+
+      // Crear una nueva instancia del producto con el stock modificado
+      _selectedProducts[index] = Product(
+        id: product.id,
+        name: product.name,
+        description: product.description, // Agregar el campo description
+        stock: newStock,
+        price: product.price,
+        checked: product.checked, // Agregar el campo checked
+        // Añadir otros campos que tenga tu modelo Product
+      );
     });
   }
 
@@ -106,32 +134,87 @@ class _DraftProductEditScreenState extends State<DraftProductEditScreen> {
                   itemCount: _selectedProducts.length,
                   itemBuilder: (context, index) {
                     final product = _selectedProducts[index];
-                    return Dismissible(
-                      key: Key(product.id.toString()),
-                      onDismissed: (direction) {
-                        _removeProduct(product);
-                      },
-                      background: Container(color: Colors.red),
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 8.0),
                       child: ListTile(
                         title: Text(product.name),
                         subtitle: Text(
                             'Stock: ${product.stock} | Precio: \$${product.price}'),
+                        trailing: SizedBox(
+                          width: 150,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.remove),
+                                onPressed: () {
+                                  _modifyProduct(product, index, 'decrease');
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.add),
+                                onPressed: () {
+                                  _modifyProduct(product, index, 'increase');
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  _modifyProduct(product, index, 'remove');
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
                         onTap: () {
-                          // Navegar a la pantalla de actualización de stock
-                          Navigator.of(context)
-                              .push(
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  UpdateStockScreen(product: product),
-                            ),
-                          )
-                              .then((_) {
-                            // Recargar productos después de la actualización
-                            setState(() {
-                              // Aquí puedes actualizar el producto en la lista de borradores
-                              _selectedProducts[index] = product;
-                            });
-                          });
+                          // Permitir la edición directa de la cantidad del producto
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text('Editar Producto'),
+                                content: TextFormField(
+                                  initialValue: product.stock.toString(),
+                                  keyboardType: TextInputType.number,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Cantidad',
+                                  ),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      int? newStock = int.tryParse(value);
+                                      if (newStock != null) {
+                                        _selectedProducts[index] = Product(
+                                          id: product.id,
+                                          name: product.name,
+                                          description: product
+                                              .description, // Agregar el campo description
+                                          stock: newStock,
+                                          price: product.price,
+                                          checked: product
+                                              .checked, // Agregar el campo checked
+                                          // Añadir otros campos que tenga tu modelo Product
+                                        );
+                                      }
+                                    });
+                                  },
+                                ),
+                                actions: <Widget>[
+                                  TextButton(
+                                    child: const Text('Cancelar'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                  TextButton(
+                                    child: const Text('Guardar'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
                         },
                       ),
                     );
@@ -155,24 +238,6 @@ class _DraftProductEditScreenState extends State<DraftProductEditScreen> {
             ],
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          // Navegar a la pantalla de agregar producto
-          await Navigator.of(context)
-              .push(
-            MaterialPageRoute(
-              builder: (context) => const AddProductScreen(),
-            ),
-          )
-              .then((newProduct) {
-            // Verificar si se ha creado un nuevo producto y agregarlo al borrador
-            if (newProduct != null && newProduct is Product) {
-              _addProduct(newProduct);
-            }
-          });
-        },
-        child: const Icon(Icons.add),
       ),
     );
   }
