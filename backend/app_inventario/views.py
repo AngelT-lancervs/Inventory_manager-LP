@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Product, Draft
 from .serializers import ProductSerializer, DraftSerializer
+from rest_framework import status
 
 class ProductListView(generics.ListAPIView):
     """
@@ -87,7 +88,7 @@ class DraftView(generics.ListCreateAPIView):
         draft_id = kwargs.get('pk')
         draft = get_object_or_404(Draft, id=draft_id)
         draft.delete()
-        return Response({"message": "Borrador eliminado correctamente."}, status=204 )
+        return Response({"message": "Borrador eliminado correctamente."}, status=204)
 
 class ProductExcelReportView(APIView):
     """
@@ -162,3 +163,16 @@ class ProductExcelReportView(APIView):
         response['Content-Disposition'] = 'attachment; filename="productos_inventario.xlsx"'
         workbook.save(response)
         return response
+    
+class MarkDraftCompletedView(APIView):
+    def post(self, request, draft_id):
+        try:
+            draft = Draft.objects.get(id=draft_id)
+            draft.completed = True
+            draft.save()
+
+            # Asegúrate de enviar la respuesta con el nuevo estado
+            return Response({"message": "Borrador marcado como completado.", "completed": draft.completed}, status=status.HTTP_200_OK)
+        except Draft.DoesNotExist:
+            return Response({"error": "Borrador no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+

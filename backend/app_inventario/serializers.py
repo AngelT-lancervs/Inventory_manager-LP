@@ -12,11 +12,11 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class DraftSerializer(serializers.ModelSerializer):
-    productsDraft = ProductSerializer(many=True) 
+    productsDraft = ProductSerializer(many=True)
 
     class Meta:
         model = Draft
-        fields = ['id', 'date', 'name', 'productsDraft']
+        fields = ['id', 'date', 'name', 'completed', 'productsDraft']
 
     def create(self, validated_data):
         products_data = validated_data.pop('productsDraft')
