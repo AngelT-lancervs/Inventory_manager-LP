@@ -54,23 +54,16 @@ La implementación de la aplicación seguirá una estructura modular, con cada i
 4. **Ejecutar la aplicación**: Iniciar la aplicación en un emulador o dispositivo móvil real para realizar pruebas.
 
 ## 8. Uso de la Aplicación
-1. **Inicio de sesión**: Ingresar con las credenciales proporcionadas para acceder a la aplicación.
-2. **Crear un nuevo inventario**: Desde la pantalla Home, seleccionar "Nuevo Inventario" para comenzar.
-3. **Modificar productos**: Seleccionar un producto de la lista para actualizar su stock.
-4. **Guardar borradores**: Guardar el progreso como borrador si no se completa el inventario.
-5. **Generar reportes**: Al finalizar, generar un reporte en Excel o PDF con los datos actualizados.
+1. **Crear un nuevo inventario**: Desde la pantalla Home, seleccionar "Nuevo Inventario" para comenzar.
+2. **Modificar productos**: Seleccionar un producto de la lista para actualizar su stock.
+3. **Guardar borradores**: Guardar el progreso como borrador si no se completa el inventario.
+4. **Generar reportes**: Al finalizar, generar un reporte en Excel o PDF con los datos actualizados.
 
 ## 9. Contribución
 Si deseas contribuir al proyecto, por favor sigue las directrices de contribución incluidas en el archivo `CONTRIBUTING.md`. Asegúrate de hacer pruebas exhaustivas antes de enviar una pull request.
 
 ## 10. Licencia
 Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` para más detalles.
-
-## 11. Contacto
-Para cualquier duda o consulta, puedes contactarnos a través de los siguientes correos electrónicos:
-- **Andrés Amador**: andres.amador@example.com
-- **Andrés Cornejo**: andres.cornejo@example.com
-- **Angel Tomalá**: angel.tomala@example.com
 
 ---
 
